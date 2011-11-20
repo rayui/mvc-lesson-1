@@ -1,5 +1,16 @@
 # A simple lesson focussing on client side MVC in javascript
 
+## To install all the requirements:
+
+* Download and install node.js
+* Download and install npm
+* npm install underscore
+* npm install backbone
+* npm install express
+* npm install browserify
+* npm install backbone-browserify
+* npm install jquery-browserify
+
 ## To generate the documentation do this:
 
 * chmod u+x doc-generator.sh
