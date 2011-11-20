@@ -12,15 +12,13 @@ models.webServer = Backbone.Model.extend({
 	//default server settings
 	defaults:{
 		port:8000,
-		public_dir:__dirname + '/public',
+		public_dir:__dirname,
 		modules:{
 			jQuery: 'jquery-browserify',
 			backbone: 'backbone-browserify'
 		}
 	},
 	initialize: function(attributes) {
-		console.log("Web server started");
-	
 		var that = this;
 		
 		//create express server with browserify
@@ -46,7 +44,9 @@ models.webServer = Backbone.Model.extend({
 		});
 	
 		//get app to listen to requests
-		app.listen(this.get('port'));
+		app.listen(parseInt(this.get('port'), 10));
+		
+		console.log("Web server started at " + this.get('port') + " on " + this.get('public_dir'));
 	}
 });
 
