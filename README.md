@@ -1,10 +1,10 @@
-*A simple lesson focussing on client side MVC in javascript
+# A simple lesson focussing on client side MVC in javascript
 
-** To generate the documentation do this:
+## To generate the documentation do this:
 
-- chmod u+x doc-generator.sh
-- ./doc-generator.sh
+* chmod u+x doc-generator.sh
+* ./doc-generator.sh
 
-** To start the server:
+## To start the server:
 
-- node js/app.js
+* node js/app.js
