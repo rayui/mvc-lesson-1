@@ -4,7 +4,7 @@
 		Backbone = require('backbone'),
 		express = require('express'),
 		browserify = require('browserify');
-	
+		
 	//define exports
 	var models = exports;
 	
@@ -14,6 +14,7 @@
 		defaults:{
 			port:8000,
 			public_dir:'/www/mvc-lesson/public',
+			docs_dir:'/www/mvc-lesson/docs',
 			modules:{
 				jQuery: 'jquery-browserify',
 				backbone: 'backbone-browserify'
@@ -27,11 +28,12 @@
 			//create express server with browserify
 			var app = express.createServer();
 			app.configure(function(){
-				app.use(express.static(that.get('public_dir')));
 				app.use(browserify({
 					require : that.get('modules')
 				}));
 				app.use(express.bodyParser());
+				app.use(express.static(that.get('public_dir')));
+
 			});
 			
 			//simple multiplication function
