@@ -16,6 +16,7 @@
   	"underscore":">=1.2.2",
   	"backbone":">=0.5.3",
   	"express":">=2.5.1",
+  	"browserify":">=1.8.0",
   	"jquery-browserify":">=1.6.2",
   	"backbone-browserify":">=0.5.3"  	
   },
