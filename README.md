@@ -8,3 +8,11 @@
 ## To start the server:
 
 * node js/app.js
+
+## To access the app:
+
+* http://localhost:8000
+
+## To access the docs:
+
+* localhost:8000/docs
