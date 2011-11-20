@@ -1,0 +1,23 @@
+{
+  "author": "Raymond Brooks <ray.userinterface@gmail.com> (http://rayui.com)",
+  "name": "mvc-lesson-1",
+  "description": "A simple lesson focussing on client side MVC in javascript",
+  "version": "0.0.0",
+  "homepage": "https://github.com/rayui/mvc-lesson-1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/rayui/mvc-lesson-1.git"
+  },
+  "main": "js/app.js",
+  "engines": {
+    "node": "v0.5.0-pre"
+  },
+  "dependencies": {
+  	"underscore":">=1.2.2",
+  	"backbone":">=0.5.3",
+  	"express":">=2.5.1",
+  	"jquery-browserify":">=2.5.1",
+  	"backbone-browserify":">=0.5.3"  	
+  },
+  "devDependencies": {}
+}
