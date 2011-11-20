@@ -18,7 +18,8 @@
   	"express":">=2.5.1",
   	"browserify":">=1.8.0",
   	"jquery-browserify":">=1.6.2",
-  	"backbone-browserify":">=0.5.3"  	
+  	"backbone-browserify":">=0.5.3",
+	"docco":">=0.3.0"  	
   },
   "devDependencies": {}
 }
