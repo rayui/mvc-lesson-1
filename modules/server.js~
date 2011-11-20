@@ -1,0 +1,54 @@
+(function () {
+    var server = false,
+    	models;
+    	
+    if (typeof exports !== 'undefined') {
+        _ = require('underscore')._;
+        Backbone = require('backbone');
+        express = require('express');
+        browserify = require('browserify');
+
+        models = exports;
+        server = true;
+    } else {
+        models = this.models = {};
+    }
+    
+    models.webServer = Backbone.Model.extend({
+	defaults:{
+		port:8000,
+		public_dir:'/www/mvc-lesson/public',
+		modules:{
+			jQuery: 'jquery-browserify',
+			backbone: 'backbone-browserify'
+		}
+	},
+	initialize: function(attributes) {
+		console.log("Web server started");
+		
+		var that = this;
+		var app = express.createServer();
+		app.configure(function(){
+			app.use(express.static(that.get('public_dir')));
+			app.use(browserify({
+				require : that.get('modules')
+			}));
+			app.use(express.bodyParser());
+		}); 	
+		
+		app.get('/docs', 
+		
+		app.post('/multiply', function(req, res) {
+			res.send({
+				operand1:req.body.operand1,
+				operand2:req.body.operand2,
+				result:req.body.operand1 * req.body.operand2
+			});
+		});
+
+		app.listen(this.get('port'));
+	}
+    });
+})();
+
+
