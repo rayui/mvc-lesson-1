@@ -14,7 +14,6 @@
 		defaults:{
 			port:8000,
 			public_dir:'/www/mvc-lesson/public',
-			docs_dir:'/www/mvc-lesson/docs',
 			modules:{
 				jQuery: 'jquery-browserify',
 				backbone: 'backbone-browserify'

@@ -1,7 +1,10 @@
 #!/bin/bash
 DOCROOT='docs'
+WEBROOT='public/docs'
+DOCINDEX="$DOCROOT/index.html"
 
 rm -rf $DOCROOT
+rm -rf $WEBROOT
 
 docco js/*.js
 docco js/modules/*.js
@@ -21,7 +24,7 @@ echo "<!DOCTYPE html><html>
 		</tr>
 	</thead>
 	<tbody>
-		<tr id='section-1'><td class='docs'>" > $DOCROOT/index.html
+		<tr id='section-1'><td class='docs'>" > $DOCINDEX
 
 # creating links to the files in directory tree
 
@@ -29,18 +32,17 @@ for i in `find $DOCROOT -name *.html`
 do
 if test -d $i
 then
-echo "<tr><td class='docs'><h2>$i</h2><ul>" >> $DOCROOT/index.html
+echo "<tr><td class='docs'><h2>$i</h2><ul>" >> $DOCINDEX
 else
-echo "<li><a href='/$i'>$i</a></li>" >> $DOCROOT/index.html
+echo "<li><a href='/$i'>$i</a></li>" >> $DOCINDEX
 fi
 done
-echo '</ul></td></tr></tbody></table>' >> $DOCROOT/index.html
+echo '</ul></td></tr></tbody></table>' >> $DOCINDEX
 
 # creating end tags for HTML
 
 echo "</body>
-</html>" >> $DOCROOT/index.html
+</html>" >> $DOCINDEX
 unset i
 
-mv $DOCROOT/* public/docs/
-rm -rf $DOCROOT
+mv $DOCROOT $WEBROOT
