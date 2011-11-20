@@ -12,7 +12,7 @@ models.webServer = Backbone.Model.extend({
 	//default server settings
 	defaults:{
 		port:8000,
-		public_dir:'/www/mvc-lesson/public',
+		public_dir:__dirname + '/public',
 		modules:{
 			jQuery: 'jquery-browserify',
 			backbone: 'backbone-browserify'
