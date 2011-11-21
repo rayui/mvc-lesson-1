@@ -4,5 +4,6 @@ var ws = require('./modules/server');
 //instantiate new web server
 var webServer = new ws.webServer({
 	'port':process.env.PORT || 8000,
-	public_dir:__dirname + '/../public/'
+	assets_dir:__dirname + '/../assets',
+	template_dir:__dirname + '/../templates'
 });

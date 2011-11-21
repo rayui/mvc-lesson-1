@@ -1,0 +1,16 @@
+!!! 5
+html
+	head
+		script(src='/browserify.js')
+		script(src='/js/common.js')
+	body
+		#header
+			h1 Javascript MVC Lesson 1: Backbone
+		#page
+			form#multiply(method="post",action="/")
+				label(for="operand1") First operand
+				input(name="operand1", id="operand1", type="text", value="#{operand1}")
+				label(for="operand2") Second operand
+				input(name="operand2", id="operand2", type="text", value="#{operand2}")
+				input(type="submit") Multiply
+			#result #{operand1} * #{operand2} = #{result}

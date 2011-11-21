@@ -13,7 +13,7 @@ multiply = {
 		},
 		
 		//- post url
-		url:'/multiply'
+		url:'/'
 	}), 
 	
 	//the data view
@@ -24,10 +24,6 @@ multiply = {
 			//- instantiate model inside view and bind model's change event to view's render
 			this.model = new multiply.model();
 			this.model.bind('change', this.render, this);
-			
-			//- fill form fields with default data
-			$('input#operand1').val(this.model.get('operand1'));
-			$('input#operand2').val(this.model.get('operand2'));
 			
 			//- bind function to refresh model from server when remaining inputs change
 			$('input').change(function() {

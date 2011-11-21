@@ -8,6 +8,7 @@
 * npm install backbone
 * npm install express
 * npm install browserify
+* npm install jade
 * npm install backbone-browserify
 * npm install jquery-browserify
 
