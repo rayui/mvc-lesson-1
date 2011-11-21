@@ -6,13 +6,6 @@ Backbone = require('backbone');
 multiply = {
 	//the data model
 	model: Backbone.Model.extend({
-		//- default values
-		defaults:{
-			operand1:0,
-			operand2:0,
-		},
-		
-		//- post url
 		url:'/'
 	}), 
 	
