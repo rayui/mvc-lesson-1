@@ -22,7 +22,7 @@ models.webServer = Backbone.Model.extend({
 		multiply:{
 			operand1:0,
 			operand2:0,
-			result:0,
+			result:0
 		}
 	},
 	renderHTML: function(res) {
