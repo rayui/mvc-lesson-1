@@ -29,3 +29,8 @@
 ## To access the docs:
 
 * http://localhost:8000/docs
+
+## Heroku ready!
+
+* Set up a new Heroku app 
+* git push heroku master 

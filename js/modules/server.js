@@ -18,7 +18,20 @@ models.webServer = Backbone.Model.extend({
 		modules:{
 			jQuery: 'jquery-browserify',
 			backbone: 'backbone-browserify'
+		},
+		multiply:{
+			operand1:0,
+			operand2:0,
+			result:0,
 		}
+	},
+	renderHTML: function(res) {
+		jade.renderFile(this.get('template_dir') + '/index.jade', this.get('multiply') ,function(err,html){
+			res.send(html);
+		});
+	},
+	renderJSON: function(res) {
+		res.json(this.get('multiply'));
 	},
 	initialize: function(attributes) {
 		var that = this;
@@ -33,37 +46,31 @@ models.webServer = Backbone.Model.extend({
 			app.use(express.static(that.get('assets_dir')));
 		});
 		
+		//simple get request
 		app.get('/', function(req, res) {
-			var result = {
-				operand1:0,
-				operand2:0,
-				result:0				
-			};
-			jade.renderFile(that.get('template_dir') + '/index.jade', result ,function(err,html){
-				res.send(html);
-			});
+			that.renderHTML(res);			
 		});
 		
 		//simple multiplication function
 		app.post('/', function(req, res) {
 			//here we accept a set of request values from the client
-			//and return the result of the calculation as a JSON object
+			//and populate our model with the new values
+			that.set({
+				multiply:{
+					operand1:req.body.operand1,
+					operand2:req.body.operand2,
+					result:req.body.operand1 * req.body.operand2
+				}
+			});
 			
-			var result = {
-				operand1:req.body.operand1,
-				operand2:req.body.operand2,
-				result:req.body.operand1 * req.body.operand2
-			};
-			
+			//choose our render method based on request content type
 			switch (req['headers']['content-type'].match(/(form|json)/)[0]) {
 				case 'json':
-					res.json(result);
+					that.renderJSON(res);
 					break;
 				case 'form':
 				default:
-					jade.renderFile(that.get('template_dir') + '/index.jade', result ,function(err,html){
-						res.send(html);
-					});
+					that.renderHTML(res);
 					break;
 			}
 		});
