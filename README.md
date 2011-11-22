@@ -11,6 +11,7 @@
 * npm install jade
 * npm install backbone-browserify
 * npm install jquery-browserify
+* npm install docco
 
 ## To generate the documentation do this:
 
