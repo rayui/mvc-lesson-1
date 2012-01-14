@@ -82,7 +82,8 @@ $(function($){
 		},
 		
 		//- render result on server response
-		render: function() {		
+		render: function() {
+			this.clearErrors();
 			$('div#result').text(
 				this.model.get('operand1') +
 				' * ' +
