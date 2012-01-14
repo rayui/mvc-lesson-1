@@ -52,13 +52,14 @@ $(function($){
 		//- when a success response is received, this will trigger the model's change event and causing it to render
 		submit:function() {	
 			var renderError = this.renderError;
+			var clearErrors = this.clearErrors;
 
-			this.clearErrors();
 			this.model.save({
 				'operand1': parseInt($('input#operand1').val(), 10),
 				'operand2': parseInt($('input#operand2').val(), 10)
 			},{
 				error: function(model, errors) {
+					clearErrors();
 					for (attr in errors) {
 						renderError(errors[attr]['id'], errors[attr]['error']);
 					}
