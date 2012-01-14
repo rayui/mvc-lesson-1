@@ -5,7 +5,6 @@
 * Download and install node.js
 * Download and install npm
 * npm install underscore
-* npm install backbone
 * npm install express
 * npm install browserify
 * npm install jade

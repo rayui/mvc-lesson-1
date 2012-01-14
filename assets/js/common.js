@@ -1,17 +1,17 @@
-//require dependencies
+//- require dependencies
 $ = jQuery = require('jQuery');
 Backbone = require('backbone');
 
 //on jquery init
 $(function($){
-	//- simplest possible model
+	//simplest possible model
 	var Model = Backbone.Model.extend({
 		url:'/',
 		validate:function(attrs) {
-			//errors array to return
+			//- errors array to return
 			var errors = [];
 			
-			//check if input is an integer and push to error array if not
+			//- check if input is an integer and push to error array if not
 			var checkInteger = function(id, value) {
 				if(!((parseFloat(value) === parseInt(value, 10)) && !isNaN(value))){
 					errors.push({
@@ -21,35 +21,35 @@ $(function($){
 				}
  			};
 			
- 			//check all field types
+ 			//- check all field types
 			for (id in attrs) {
 				checkInteger(id, attrs[id]);
 			}
 			
-			//if elements with errors, return them
+			//- if elements with errors, return them
 			if (errors.length) {
 				return errors;
 			}
 			
-			//otherwise return null
+			//- otherwise return null
 			return null;
 		}
 	});
 
-	//- basic view for multiplier calculator
+	//basic view for multiplier calculator
 	var View = Backbone.View.extend({
-		//-- element to bind view to
+		//- element to bind view to
 		el:$('#page'),
 		
-		//-- default events
+		//- default events
 		events:{
 			'change input[type="text"]':	'submit',
 			'submit #multiply':		'submit'
 		},
 		
-		//-- when inputs change, save the model to the server
-		//-- if it fails validation, the error function will kick in
-		//-- when a success response is received, this will trigger the model's change event and causing it to render
+		//- when inputs change, save the model to the server
+		//- if it fails validation, the error function will kick in
+		//- when a success response is received, this will trigger the model's change event and causing it to render
 		submit:function() {	
 			var renderError = this.renderError;
 
@@ -68,19 +68,19 @@ $(function($){
 			return false;
 		},
 		
-		//-- renders and error notification
+		//- renders and error notification
 		renderError: function(id, error) {
 			$('input#' + id).addClass('error');
 			$('div#result').append('<span>' + id + ': ' + error + '</span>');
 		},
 		
-		//-- clears existing error notifications
+		//- clears existing error notifications
 		clearErrors: function() {
 			$('input').removeClass('error');
-			$('div#result').text('');
+			$('div#result').empty();
 		},
 		
-		//-- render result on server response
+		//- render result on server response
 		render: function() {		
 			$('div#result').text(
 				this.model.get('operand1') +
@@ -91,15 +91,15 @@ $(function($){
 			);
 		},
 		
-		//-- init
+		//- init
 		initialize:function() {		
-			//--- instantiate Model inside View and bind new model's change event to this View's render method
-			//--- note that this is backbone's bind, different from jQuery
+			//-- instantiate Model inside View and bind new model's change event to this View's render method
+			//-- note that this is backbone's bind, different from jQuery
 			this.model = new Model();
 			this.model.bind('change', this.render, this);
 		}
 	});
 	
-	//- instantiate view	
+	//instantiate view	
 	new View();
 });
