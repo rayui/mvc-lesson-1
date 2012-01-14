@@ -2,33 +2,86 @@
 $ = jQuery = require('jQuery');
 Backbone = require('backbone');
 
-//define the client side application
-multiply = {
-	//the data model
-	model: Backbone.Model.extend({
-		url:'/'
-	}), 
-	
-	//the data view
-	view: Backbone.View.extend({
-		initialize:function() {
-			var that = this;
+//on jquery init
+$(function($){
+	//- simplest possible model
+	var Model = Backbone.Model.extend({
+		url:'/',
+		validate:function(attrs) {
+			//errors array to return
+			var errors = [];
 			
-			//- instantiate model inside view and bind model's change event to view's render
-			this.model = new multiply.model();
-			this.model.bind('change', this.render, this);
+			//check if input is an integer and push to error array if not
+			var checkInteger = function(id, value) {
+				if(!((parseFloat(value) === parseInt(value, 10)) && !isNaN(value))){
+					errors.push({
+						id:id,
+						error:'must be an integer'
+					});
+				}
+ 			};
 			
-			//- bind function to refresh model from server when remaining inputs change
-			$('input').change(function() {
-				that.model.set({
-					'operand1': parseInt($('input#operand1').val(), 10),
-					'operand2': parseInt($('input#operand2').val(), 10)
-				});
-				that.model.save();
-			});
+ 			//check all field types
+			for (id in attrs) {
+				checkInteger(id, attrs[id]);
+			}
+			
+			//if elements with errors, return them
+			if (errors.length) {
+				return errors;
+			}
+			
+			//otherwise return null
+			return null;
+		}
+	});
+
+	//- basic view for multiplier calculator
+	var View = Backbone.View.extend({
+		//-- element to bind view to
+		el:$('#page'),
+		
+		//-- default events
+		events:{
+			'change input[type="text"]':	'submit',
+			'submit #multiply':		'submit'
 		},
-		render: function() {
-			//- fill result box with fresh data from server
+		
+		//-- when inputs change, save the model to the server
+		//-- if it fails validation, the error function will kick in
+		//-- when a success response is received, this will trigger the model's change event and causing it to render
+		submit:function() {	
+			var renderError = this.renderError;
+
+			this.clearErrors();
+			this.model.save({
+				'operand1': parseInt($('input#operand1').val(), 10),
+				'operand2': parseInt($('input#operand2').val(), 10)
+			},{
+				error: function(model, errors) {
+					for (attr in errors) {
+						renderError(errors[attr]['id'], errors[attr]['error']);
+					}
+				}
+			});
+			
+			return false;
+		},
+		
+		//-- renders and error notification
+		renderError: function(id, error) {
+			$('input#' + id).addClass('error');
+			$('div#result').append('<span>' + id + ': ' + error + '</span>');
+		},
+		
+		//-- clears existing error notifications
+		clearErrors: function() {
+			$('input').removeClass('error');
+			$('div#result').text('');
+		},
+		
+		//-- render result on server response
+		render: function() {		
 			$('div#result').text(
 				this.model.get('operand1') +
 				' * ' +
@@ -36,11 +89,17 @@ multiply = {
 				' = ' +
 				this.model.get('result')
 			);
+		},
+		
+		//-- init
+		initialize:function() {		
+			//--- instantiate Model inside View and bind new model's change event to this View's render method
+			//--- note that this is backbone's bind, different from jQuery
+			this.model = new Model();
+			this.model.bind('change', this.render, this);
 		}
-	})
-};
-
-$(document).ready(function() {
-	// instantiate view on page load
-	new multiply.view();
+	});
+	
+	//- instantiate view	
+	new View();
 });

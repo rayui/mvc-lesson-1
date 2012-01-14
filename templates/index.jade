@@ -3,14 +3,21 @@ html
 	head
 		script(src='/browserify.js')
 		script(src='/js/common.js')
+		link(rel="stylesheet", type="text/css", href="/css/style.css")	
 	body
 		#header
 			h1 Javascript MVC Lesson 1: Backbone
 		#page
 			form#multiply(method="post",action="/")
 				label(for="operand1") First operand
-				input(name="operand1", id="operand1", type="text", value="#{operand1}")
+				- if (typeof(operand1) != 'undefined')
+					input(name="operand1", id="operand1", type="text", value=operand1)
+				-else
+					input(name="operand1", id="operand1", type="text", placeholder="Enter an integer value")
 				label(for="operand2") Second operand
-				input(name="operand2", id="operand2", type="text", value="#{operand2}")
-				input(type="submit") Multiply
+				- if (typeof(operand2) != 'undefined')
+					input(name="operand2", id="operand2", type="text", value=operand2)
+				-else
+					input(name="operand2", id="operand2", type="text", placeholder="Enter an integer value")
+				input(type="submit")
 			#result #{operand1} * #{operand2} = #{result}

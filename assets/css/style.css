@@ -1,0 +1,54 @@
+body {
+	font-family: sans-serif;
+	font-size: 82.5%;
+}
+
+#header, 
+#page {
+	width:600px;
+	margin:0 auto;
+}
+
+label {
+	display:block;
+	float:left;
+	clear:left;
+	width:150px;
+	margin:0 0 3px;
+	padding:5px 0 0 0;
+	border:0;
+}
+
+input[type='text'] {
+	display:block;
+	float:left;
+	margin:0 0 3px 0;
+	padding:2px;
+	border:1px solid #c0c0c0;
+}
+
+input[type='submit'] {
+	display:block;
+	float:none;
+	clear:both;
+	margin:0 0 0 150px;
+}
+
+#multiply {
+	overflow:hidden;
+}
+
+#result {
+	display:block;
+	clear:both;
+	margin:10px 0 0 150px;
+}
+
+input.error {
+	border:1px solid red;
+}
+
+#result span {
+	display:block;
+	color:red;	
+}
