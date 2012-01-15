@@ -1,6 +1,6 @@
 #!/bin/bash
 DOCROOT='docs'
-WEBROOT='assets/docs'
+WEBROOT='public/docs'
 DOCINDEX="$DOCROOT/index.html"
 
 rm -rf $DOCROOT
@@ -8,7 +8,8 @@ rm -rf $WEBROOT
 
 docco js/*.js
 docco js/modules/*.js
-docco assets/js/*.js
+docco js/modules/shared/*.js
+docco public/js/*.js
 
 echo "<!DOCTYPE html><html>
 <head><title>MVC Lesson 1/</title>

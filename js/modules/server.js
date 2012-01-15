@@ -14,7 +14,7 @@ models.webServer = function(_options){
 	var options = {
 		port:8000,
 		shared_dir:__dirname + '/shared',
-		assets_dir:__dirname + '/../../public',
+		public_dir:__dirname + '/../../public',
 		template_dir:__dirname + '/../../templates'
 	};
 	
@@ -32,7 +32,7 @@ models.webServer = function(_options){
 	};
 	
 	//validate inputs and perform multiplication
-	var multiply = function(data) {
+	var multiplyData = function(data) {
 		data.errors = utilities.validate(data.attributes);
 		if (data.errors) {
 			data.result = undefined;
@@ -43,12 +43,27 @@ models.webServer = function(_options){
 		return data;
 	};
 	
+	var serveError = function(res, number) {
+		jade.renderFile(options['template_dir'] + '/' + number + '.jade', {}, function(err,html){
+			res.header('Content-Type', 'text/html');
+			if (err) {
+				if (number !== 500) {
+					serveError(res, 500);
+				} else {
+					res.send('<h1>FATAL SERVER ERROR</h1>', 500)
+				}
+			} else {
+				res.send(html, number);
+			}
+		});	
+	};
+	
 	//serve static files
 	var serveStatic = function(res, fn, contentType) {
 		fs.readFile(fn, function(err,data){
 			res.header('Content-Type', contentType);
 			if(err) {
-				res.send(404);
+				serveError(res, 404);
 				return;
 			}
 			res.send(data);
@@ -56,11 +71,11 @@ models.webServer = function(_options){
 	};
 	
 	//renders a chunk of markup to the response object
-	var renderHTML = function(res, data) {
+	var serveHTML = function(res, data) {
 		jade.renderFile(options['template_dir'] + '/index.jade', data, function(err,html){
 			res.header('Content-Type', 'text/html');
 			if (err) {
-				res.send(500);
+				serveError(res, 500);
 				return;
 			}
 			res.send(html);
@@ -68,35 +83,35 @@ models.webServer = function(_options){
 	};
 	
 	//renders a chunk of JSON to the response object
-	var renderJSON = function(res, data) {
+	var serveJSON = function(res, data) {
 		res.json(data);
 	};
 	
-	//extend default options
-	_.extend(options, _options);
-	
 	//create express server with browserify
 	var app = express.createServer();
+	
+	//extend default options
+	_.extend(options, _options);
 	
 	//configure express app
 	app.configure(function(){
 		app.use(express.bodyParser());
 	});
 	
-	//simple get request. send undefined data
-	app.get('/', function(req, res) {
-		data = defaultData();
-		renderHTML(res, data);			
+	//routing for directories with no trailing slash
+	app.get(/^(\/[\w\-\.]+)$/, function(req, res) {
+		res.header('Location', req.params[0] + '/');
+		res.send(302);
 	});
 	
 	//routing for css
 	app.get(/^\/css\/(\w+\.css)?/, function(req, res) {
-		serveStatic(res, options['assets_dir'] + '/css/' + req.params[0], 'text/css');
+		serveStatic(res, options['public_dir'] + '/css/' + req.params[0], 'text/css');
 	});
 	
 	//routing for js
 	app.get(/^\/js\/((shared|lib)\/)?([\w\-\.]+\.js)/, function(req, res) {
-		var baseDir = options['assets_dir'] + '/js';
+		var baseDir = options['public_dir'] + '/js';
 		switch (req.params[1]) {
 			case 'shared':
 				baseDir = options['shared_dir'];
@@ -110,14 +125,28 @@ models.webServer = function(_options){
 		serveStatic(res, baseDir + '/' + req.params[2], 'application/javascript');
 	});
 	
-	//fallback routing
-	app.get(/^.*?/, function(req, res) {
-		res.send(404);
+	//routing for docs
+	app.get(/^\/docs\/([\w\-\.]+\.(css|html))?$/, function(req, res) {
+		var fn = req.params[0] ? req.params[0] : 'index.html';
+		var contentType = 'text/' + (req.params[1] ? req.params[1] : 'html');
+		
+		serveStatic(res, options['public_dir'] + '/docs/' + fn, contentType);
 	});
 	
-	//simple multiplication function
+	//simple get request. send undefined data
+	app.get('/', function(req, res) {
+		data = defaultData();
+		serveHTML(res, data);			
+	});
+	
+	//fallback routing
+	app.get(/^.*?/, function(req, res) {
+		serveError(res, 404);
+	});
+
+	//simple post multiplication function
 	app.post('/', function(req, res) {
-		var data = multiply(defaultData({
+		var data = multiplyData(defaultData({
 			operand1:req.body.operand1,
 			operand2:req.body.operand2
 		}));
@@ -125,11 +154,11 @@ models.webServer = function(_options){
 		//choose our render method based on request content type
 		switch (req['headers']['content-type'].match(/(form|json)/)[0]) {
 			case 'json':
-				renderJSON(res, data);
+				serveJSON(res, data);
 				break;
 			case 'form':
 			default:
-				renderHTML(res, data);
+				serveHTML(res, data);
 				break;
 		}
 	});
