@@ -6,10 +6,7 @@
 * Download and install npm
 * npm install underscore
 * npm install express
-* npm install browserify
 * npm install jade
-* npm install backbone-browserify
-* npm install jquery-browserify
 * npm install docco
 
 ## To generate the documentation do this:
