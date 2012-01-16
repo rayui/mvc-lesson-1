@@ -43,48 +43,51 @@ models.webServer = function(_options){
 		return data;
 	};
 	
-	var serveError = function(res, number) {
+	var serveError = function(number, callback) {
 		jade.renderFile(options['template_dir'] + '/' + number + '.jade', {}, function(err,html){
-			res.header('Content-Type', 'text/html');
 			if (err) {
 				if (number !== 500) {
-					serveError(res, 500);
+					serveError(500, function(html, http_code) {
+						callback.apply(this, [html, http_code]);
+					});
 				} else {
-					res.send('<h1>FATAL SERVER ERROR</h1>', 500)
+					callback.apply(this, ['<h1>FATAL SERVER ERROR</h1>', 500]);
 				}
 			} else {
-				res.send(html, number);
+				callback.apply(this, [html, number]);
 			}
 		});	
 	};
 	
 	//serve static files
-	var serveStatic = function(res, fn, contentType) {
+	var serveStatic = function(fn, callback) {
 		fs.readFile(fn, function(err,data){
-			res.header('Content-Type', contentType);
 			if(err) {
-				serveError(res, 404);
+				serveError(404, function(data, http_code) {
+					callback.apply(this, [data, http_code]);
+				});
 				return;
 			}
-			res.send(data);
+			callback.apply(this, [data, 200]);
 		});
 	};
 	
 	//renders a chunk of markup to the response object
-	var serveHTML = function(res, data) {
-		jade.renderFile(options['template_dir'] + '/index.jade', data, function(err,html){
-			res.header('Content-Type', 'text/html');
+	var serveHTML = function(data, callback) {
+		jade.renderFile(options['template_dir'] + '/index.jade', data, function(err,html) {
 			if (err) {
-				serveError(res, 500);
+				serveError(500, function(html, http_code) {
+					callback.apply(this, [html, http_code]);
+				});
 				return;
 			}
-			res.send(html);
+			callback.apply(this, [html, 200]);
 		});
 	};
 	
 	//renders a chunk of JSON to the response object
-	var serveJSON = function(res, data) {
-		res.json(data);
+	var serveJSON = function(data, callback) {
+		callback.apply(this, [data, 200]);
 	};
 	
 	//create express server with browserify
@@ -106,7 +109,10 @@ models.webServer = function(_options){
 	
 	//routing for css
 	app.get(/^\/css\/(\w+\.css)?/, function(req, res) {
-		serveStatic(res, options['public_dir'] + '/css/' + req.params[0], 'text/css');
+		serveStatic(options['public_dir'] + '/css/' + req.params[0], function(data, http_code) {
+			res.header('Content-Type', 'text/css');
+			res.send(data, http_code);
+		});
 	});
 	
 	//routing for js
@@ -122,7 +128,10 @@ models.webServer = function(_options){
 			default:
 				break;
 		}
-		serveStatic(res, baseDir + '/' + req.params[2], 'application/javascript');
+		serveStatic(baseDir + '/' + req.params[2], function(data, http_code) {
+			res.header('Content-Type', 'application/javascript');
+			res.send(data, http_code);
+		});
 	});
 	
 	//routing for docs
@@ -130,18 +139,28 @@ models.webServer = function(_options){
 		var fn = req.params[0] ? req.params[0] : 'index.html';
 		var contentType = 'text/' + (req.params[1] ? req.params[1] : 'html');
 		
-		serveStatic(res, options['public_dir'] + '/docs/' + fn, contentType);
+		serveStatic(options['public_dir'] + '/docs/' + fn, function(data, http_code) {
+			res.header('Content-Type', contentType);
+			res.send(data, http_code);
+		});
 	});
 	
 	//simple get request. send undefined data
 	app.get('/', function(req, res) {
 		data = defaultData();
-		serveHTML(res, data);			
+		
+		serveHTML(data, function(html, http_code) {
+			res.header('Content-Type', 'text/html');
+			res.send(html, http_code);	
+		});			
 	});
 	
 	//fallback routing
 	app.get(/^.*?/, function(req, res) {
-		serveError(res, 404);
+		serveError(404, function(data, http_code) {
+			res.header('Content-Type', 'text/html');
+			res.send(data, http_code);
+		});
 	});
 
 	//simple post multiplication function
@@ -154,11 +173,17 @@ models.webServer = function(_options){
 		//choose our render method based on request content type
 		switch (req['headers']['content-type'].match(/(form|json)/)[0]) {
 			case 'json':
-				serveJSON(res, data);
+				serveJSON(data, function(data, http_code) {
+					res.header('Content-Type', 'application/javascript');
+					res.send(data, http_code);
+				});
 				break;
 			case 'form':
 			default:
-				serveHTML(res, data);
+				serveHTML(data, function(html, http_code) {
+					res.header('Content-Type', 'text/html');
+					res.send(html, http_code);
+				});
 				break;
 		}
 	});
