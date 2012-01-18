@@ -15,7 +15,7 @@ exports.webServer = function(_options){
 	};
 	
 	//server error pages
-	var serveError = function(number, template, callback) {
+	function serveError(number, template, callback) {
 		jade.renderFile(template, number, function(err,html){
 			if (err) {
 				if (number !== 500) {
@@ -32,7 +32,7 @@ exports.webServer = function(_options){
 	};
 	
 	//serve static files
-	var serveStatic = function(path, callback) {
+	function serveStatic(path, callback) {
 		fs.readFile(path, function(err,data){
 			if(err) {
 				serveError(404, function(html, http_code) {
@@ -45,7 +45,7 @@ exports.webServer = function(_options){
 	};
 	
 	//renders a chunk of markup to the response object
-	var serveHTML = function(data, template, callback) {
+	function serveHTML(data, template, callback) {
 		jade.renderFile(template, data, function(err,html) {
 			if (err) {
 				serveError(500, function(html, http_code) {
@@ -58,14 +58,14 @@ exports.webServer = function(_options){
 	};
 	
 	//this is the callback that sends the response
-	var sendResponse = function(data, http_code, headers, res) {
+	function sendResponse(data, http_code, headers, res) {
 		for (header in headers) {
 			res.header(header, headers[header]);
 		}
 		res.end(data, http_code);
 	}
 	
-	var getRoute = function(_route) {
+	function getRoute(_route) {
 		var router = function(req, res, next, route) {
 			switch (route.type) {
 				case '302':
@@ -93,7 +93,7 @@ exports.webServer = function(_options){
 		app.get(new RegExp(_route.regex), utilities.callback(router, {args:[_route], scope:this}));
 	};
 	
-	var postRoute = function(_route) {
+	function postRoute(_route) {
 		var router = function(req, res, next, route) {
 			var headers = route.headers(req.headers);
 			var data = utilities.callFunctionByName(route.model, models, req.body);
@@ -124,9 +124,7 @@ exports.webServer = function(_options){
 	app.configure(function(){
 		app.use(express.bodyParser());
 	});
-	
-	console.log(options);
-	
+		
 	//set up routing loop
 	for (var i in options.routing) {
 		options.routing[i].method === 'get' ? new getRoute(options.routing[i]) : new postRoute(options.routing[i]);
