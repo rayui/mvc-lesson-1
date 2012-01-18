@@ -11,12 +11,12 @@ exports.webServer = function(_options){
 	//default settings
 	var options = {
 		port:8000,
-		template_dir:__dirname + '/../../templates',
+		template_dir:__dirname + '/../../templates'
 	};
 	
 	//server error pages
 	var serveError = function(number, template, callback) {
-		jade.renderFile(template, {}, function(err,html){
+		jade.renderFile(template, number, function(err,html){
 			if (err) {
 				if (number !== 500) {
 					serveError(500, '', function(html, http_code) {
@@ -64,17 +64,6 @@ exports.webServer = function(_options){
 		}
 		res.end(data, http_code);
 	}
-	
-	//create express server with browserify
-	var app = express.createServer();
-	
-	//extend default options
-	_.extend(options, _options);
-	
-	//configure express app
-	app.configure(function(){
-		app.use(express.bodyParser());
-	});
 	
 	var getRoute = function(_route) {
 		var router = function(req, res, next, route) {
@@ -125,6 +114,19 @@ exports.webServer = function(_options){
 		app.post(new RegExp(_route.regex), utilities.callback(router, {args:[_route], scope:this}));
 	};
 		
+	//create express server with browserify
+	var app = express.createServer();
+	
+	//extend default options
+	_.extend(options, _options);
+	
+	//configure express app
+	app.configure(function(){
+		app.use(express.bodyParser());
+	});
+	
+	console.log(options);
+	
 	//set up routing loop
 	for (var i in options.routing) {
 		options.routing[i].method === 'get' ? new getRoute(options.routing[i]) : new postRoute(options.routing[i]);
