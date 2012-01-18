@@ -9,6 +9,10 @@
 	    return size;
 	};
 	
+	RegExp.escape = function(text) {
+	    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+	};
+	
 	/* A utility function for callback() */
 	function toArray(arrayLike){
 	    var arr = [];
@@ -64,5 +68,20 @@
 	    }
 	    return cb;
 	}
+	
+	//nicked from:
+	//http://stackoverflow.com/questions/359788/how-to-execute-a-javascript-function-when-i-have-its-name-as-a-string
+	//modified to return an object class as opposed to a new instance
+	
+	exports.callFunctionByName = function(functionName, context /*, args */) {
+		var args = Array.prototype.slice.call(arguments).splice(2);
+		var namespaces = functionName.split(".");
+		var func = namespaces.pop();
+		for(var i = 0; i < namespaces.length; i++) {
+			context = context[namespaces[i]];
+		}
+		return context[func].apply(this, args);
+	}
+	
 
 })(typeof exports === 'undefined'? this['utilities']={}: exports);

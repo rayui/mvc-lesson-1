@@ -1,7 +1,5 @@
 //require web server module
 var ws = require('./modules/server');
+var appconfig = require('./modules/appconfig');
 
-//instantiate new web server
-var webServer = new ws.webServer({
-	'port':process.env.PORT || 8000
-});
+var webServer = new ws.webServer(appconfig.get('webServer'));

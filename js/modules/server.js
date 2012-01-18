@@ -1,54 +1,25 @@
 //set up dependencies
 var _ = require('underscore')._,
-	fs = require('fs');
+	fs = require('fs'),
 	express = require('express'),
 	jade = require('jade'),
-	utilities = require('./shared/utilities');
+	utilities = require('./shared/utilities'),
+	models = require('./models');	
 	
-//define exports
-var models = exports;
-
 //set up server model
-models.webServer = function(_options){
+exports.webServer = function(_options){
 	//default settings
 	var options = {
 		port:8000,
-		shared_dir:__dirname + '/shared',
-		public_dir:__dirname + '/../../public',
-		template_dir:__dirname + '/../../templates'
-	};
-	
-	//create default data object
-	var defaultData = function(_data) {
-		var data = {
-			attributes:{
-				operand1:undefined,
-				operand2:undefined
-			},
-			errors:{}
-		};
-		_.extend(data.attributes, _data);
-		return data;
-	};
-	
-	//validate inputs and perform multiplication
-	var multiplyData = function(data) {
-		data.errors = utilities.validate(data.attributes);
-		if (data.errors) {
-			data.result = undefined;
-		} else {
-			data.errors = [];
-			data.attributes.result = data.attributes.operand1 * data.attributes.operand2;
-		}
-		return data;
+		template_dir:__dirname + '/../../templates',
 	};
 	
 	//server error pages
-	var serveError = function(number, callback) {
-		jade.renderFile(options['template_dir'] + '/' + number + '.jade', {}, function(err,html){
+	var serveError = function(number, template, callback) {
+		jade.renderFile(template, {}, function(err,html){
 			if (err) {
 				if (number !== 500) {
-					serveError(500, function(html, http_code) {
+					serveError(500, '', function(html, http_code) {
 						callback.apply(this, [html, http_code]);
 					});
 				} else {
@@ -61,8 +32,8 @@ models.webServer = function(_options){
 	};
 	
 	//serve static files
-	var serveStatic = function(fn, callback) {
-		fs.readFile(fn, function(err,data){
+	var serveStatic = function(path, callback) {
+		fs.readFile(path, function(err,data){
 			if(err) {
 				serveError(404, function(html, http_code) {
 					callback.apply(this, [html, http_code]);
@@ -74,8 +45,8 @@ models.webServer = function(_options){
 	};
 	
 	//renders a chunk of markup to the response object
-	var serveHTML = function(data, callback) {
-		jade.renderFile(options['template_dir'] + '/index.jade', data, function(err,html) {
+	var serveHTML = function(data, template, callback) {
+		jade.renderFile(template, data, function(err,html) {
 			if (err) {
 				serveError(500, function(html, http_code) {
 					callback.apply(this, [html, http_code]);
@@ -87,9 +58,11 @@ models.webServer = function(_options){
 	};
 	
 	//this is the callback that sends the response
-	var sendResponse = function(html, http_code, contentType, res) {
-		res.header(contentType);
-		res.end(html, http_code);
+	var sendResponse = function(data, http_code, headers, res) {
+		for (header in headers) {
+			res.header(header, headers[header]);
+		}
+		res.end(data, http_code);
 	}
 	
 	//create express server with browserify
@@ -103,73 +76,62 @@ models.webServer = function(_options){
 		app.use(express.bodyParser());
 	});
 	
-	//routing for directories with no trailing slash
-	app.get(/^(\/[\w\-\.]+)$/, function(req, res) {
-		res.header('Location', req.params[0] + '/');
-		res.send(302);
-	});
-	
-	//routing for css
-	app.get(/^\/css\/(\w+\.css)?/, function(req, res) {
-		serveStatic(options['public_dir'] + '/css/' + req.params[0], utilities.callback(sendResponse, {args:['text/css', res]}));
-	});
-	
-	//routing for js
-	app.get(/^\/js\/((shared|lib)\/)?([\w\-\.]+\.js)/, function(req, res) {
-		var baseDir = options['public_dir'] + '/js';
-		switch (req.params[1]) {
-			case 'shared':
-				baseDir = options['shared_dir'];
-				break;
-			case 'lib':
-				baseDir += '/lib';
-				break;
-			default:
-				break;
-		}		
-		serveStatic(baseDir + '/' + req.params[2], utilities.callback(sendResponse, {args:['application/javascript', res]}));
-	});
-	
-	//routing for docs
-	app.get(/^\/docs\/([\w\-\.]+\.(css|html))?$/, function(req, res) {
-		var fn = req.params[0] ? req.params[0] : 'index.html';
-		var contentType = 'text/' + (req.params[1] === 'css' ? 'css' : 'html');
+	var getRoute = function(_route) {
+		var router = function(req, res, next, route) {
+			switch (route.type) {
+				case '302':
+					var template = options['template_dir'] + '/' + '302.jade';
+					serveError(302, template, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
+					break;
+				case '404':
+					var template = options['template_dir'] + '/' + '404.jade';
+					serveError(404, template, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
+					break;
+				case 'static':
+					var headers = route.headers(req.headers, req.params);
+					var path = __dirname + route.path(req.params);
+					serveStatic(path, utilities.callback(sendResponse, {args:[headers,res]}));
+					break;
+				case 'html':
+				default:
+					var headers = route.headers(req.headers, req.params);
+					var data = utilities.callFunctionByName(route.model, models, req.params);
+					var template = options['template_dir'] + '/index.jade';
+					serveHTML(data, template, utilities.callback(sendResponse, {args:[headers,res]}));
+			}	
+		};
 		
-		serveStatic(options['public_dir'] + '/docs/' + fn, utilities.callback(sendResponse, {args:[contentType, res]}));
-	});
+		app.get(new RegExp(_route.regex), utilities.callback(router, {args:[_route], scope:this}));
+	};
 	
-	//simple get request. send undefined data
-	app.get('/', function(req, res) {
-		data = defaultData();
-		serveHTML(data, utilities.callback(sendResponse, {args:['text/html',res]}));
-	});
-	
-	//fallback routing
-	app.get(/^.*?/, function(req, res) {
-		serveError(404, utilities.callback(sendResponse, {args:['text/html',res]}));
-	});
-
-	//simple post multiplication function
-	app.post('/', function(req, res) {
-		var data = multiplyData(defaultData({
-			operand1:req.body.operand1,
-			operand2:req.body.operand2
-		}));
+	var postRoute = function(_route) {
+		var router = function(req, res, next, route) {
+			var headers = route.headers(req.headers);
+			var data = utilities.callFunctionByName(route.model, models, req.body);
+			
+			//choose our render method based on request content type
+			switch (headers['Content-Type']) {
+				case 'application/json':
+					res.json(data, 200);
+					break;
+				case 'text/html':
+				default:
+					var template = options['template_dir'] + '/index.jade';
+					serveHTML(data, template, utilities.callback(sendResponse, {args:[headers,res]}));
+					break;
+			}
+		};
+			
+		app.post(new RegExp(_route.regex), utilities.callback(router, {args:[_route], scope:this}));
+	};
 		
-		//choose our render method based on request content type
-		switch (req['headers']['content-type'].match(/(form|json)/)[0]) {
-			case 'json':
-				res.json(data, 200);
-				break;
-			case 'form':
-			default:
-				serveHTML(data, utilities.callback(sendResponse, {args:['text/html',res]}));
-				break;
-		}
-	});
-
+	//set up routing loop
+	for (var i in options.routing) {
+		options.routing[i].method === 'get' ? new getRoute(options.routing[i]) : new postRoute(options.routing[i]);
+	}
+	
 	//get app to listen to requests
-	app.listen(parseInt(options['port'], 10));
+	app.listen(process.env.PORT || parseInt(options['port'], 10));
 
 	//confirm app is running
 	console.log("Web server started at " + options['port']);
