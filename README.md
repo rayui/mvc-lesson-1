@@ -7,6 +7,7 @@
 * npm install underscore
 * npm install express
 * npm install jade
+* npm install optimist
 * npm install docco
 
 ## To generate the documentation do this:
