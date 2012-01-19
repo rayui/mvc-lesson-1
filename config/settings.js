@@ -1,7 +1,8 @@
 var dev = {
 	webServer:{
 		options:{
-			port:8000
+			port:8000,
+			template_dir:'/../../templates'
 		},
 		routing:[
 			{
@@ -61,6 +62,18 @@ var dev = {
 				}
 			},
 			{
+				regex:'^\\/config/$',
+				type:'dynamic',
+				method:'get',
+				headers: function(headers, params) {
+					return {
+						'Content-Type':'text/html'
+					}	
+				},
+				model: 'config',
+				template: 'config'
+			},
+			{
 				regex:'^\\/$',
 				type:'dynamic',
 				method:'get',
@@ -70,7 +83,7 @@ var dev = {
 					}	
 				},
 				model: 'defaultData',
-				template: 'index'
+				template: 'multiply'
 			},
 			{
 				regex:'^(\\/[\\w\\-\\.]+)$',
@@ -90,7 +103,7 @@ var dev = {
 				headers:function(headers, params) {
 					return {}
 				}
-			},		
+			},
 			{
 				regex:'\\/',
 				method:'post',
@@ -100,7 +113,7 @@ var dev = {
 					}
 				},
 				model: 'multiplyData',
-				template: 'index'
+				template: 'multiply'
 			}
 		]
 	}

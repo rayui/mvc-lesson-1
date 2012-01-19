@@ -2,6 +2,11 @@ var _ = require('underscore')._,
 	utilities = require('./shared/utilities'),
 	validate = require('./shared/validate');
 
+//validate inputs and perform multiplication
+exports.config = function(data) {
+	return data;
+};
+	
 //create default data object
 exports.defaultData = function(_data) {
 	var data = {

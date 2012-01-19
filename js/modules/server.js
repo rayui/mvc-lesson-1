@@ -7,24 +7,28 @@ var _ = require('underscore')._,
 	models = require('./models');	
 	
 //set up server model
-exports.webServer = function(_options){
+exports.webServer = function(_settings){
 	//default settings
-	var options = {
-		port:8000,
-		template_dir:__dirname + '/../../templates'
+	var settings = {
+        options:{
+            port:process.env.PORT || 8000,
+            template_dir:'/../../templates'
+        }
 	};
 	
 	//server error pages
-	function serveError(number, callback) {
-		var template = options['template_dir'] + '/' + number + '.jade';
-		jade.renderFile(template, number, function(err,html){
+	function serveError(number, data, callback) {
+	    data = data || {};
+		var template = __dirname + settings.options['template_dir'] + '/' + number + '.jade';
+		jade.renderFile(template, data, function(err,html){
 			if (err) {
 				if (number !== 500) {
-					serveError(500, function(html, http_code) {
+				    data.err = err;
+					serveError(500, data, function(html, http_code) {
 						callback.apply(this, [html, http_code]);
 					});
 				} else {
-					callback.apply(this, ['<h1>FATAL SERVER ERROR</h1>', 500]);
+					callback.apply(this, ['<h1>FATAL SERVER ERROR</h1>' + JSON.stringify(err), 500]);
 				}
 			} else {
 				callback.apply(this, [html, number]);
@@ -34,9 +38,9 @@ exports.webServer = function(_options){
 	
 	//serve static files
 	function serveStatic(path, callback) {
-		fs.readFile(path, function(err,data){
+		fs.readFile(__dirname + path, function(err, data){
 			if(err) {
-				serveError(404, function(html, http_code) {
+			  serveError(404, {}, function(html, http_code) {
 					callback.apply(this, [html, http_code]);
 				});
 			} else {
@@ -47,9 +51,11 @@ exports.webServer = function(_options){
 	
 	//renders a chunk of markup to the response object
 	function serveHTML(data, template, callback) {
-		jade.renderFile(template, data, function(err,html) {
+	    data.settings = settings
+		jade.renderFile(__dirname + template, data, function(err,html) {
 			if (err) {
-				serveError(500, function(html, http_code) {
+			    data.err = err;
+				serveError(500, data, function(html, http_code) {
 					callback.apply(this, [html, http_code]);
 				});
 			} else {
@@ -74,19 +80,19 @@ exports.webServer = function(_options){
 					res.redirect(headers['Location']);
 					break;
 				case '404':
-					var template = options['template_dir'] + '/404.jade';
-					serveError(404, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
+					var template = settings.options['template_dir'] + '/404.jade';
+					serveError(404, {}, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
 					break;
 				case 'static':
 					var headers = route.headers(req.headers, req.params);
-					var path = __dirname + route.path(req.params);
+					var path = route.path(req.params);
 					serveStatic(path, utilities.callback(sendResponse, {args:[headers,res]}));
 					break;
 				case 'dynamic':
 				default:
 					var headers = route.headers(req.headers, req.params);
 					var data = utilities.callFunctionByName(route.model, models, req.params);
-					var template = options['template_dir'] + '/' + route['template'] + '.jade';
+					var template = settings.options['template_dir'] + '/' + route['template'] + '.jade';
 					serveHTML(data, template, utilities.callback(sendResponse, {args:[headers,res]}));
 			}	
 		};
@@ -106,7 +112,7 @@ exports.webServer = function(_options){
 					break;
 				case 'text/html':
 				default:
-					var template = options['template_dir'] + '/index.jade';
+					var template = settings.options['template_dir'] + '/' + route['template'] + '.jade';
 					serveHTML(data, template, utilities.callback(sendResponse, {args:[headers,res]}));
 					break;
 			}
@@ -119,22 +125,22 @@ exports.webServer = function(_options){
 	var app = express.createServer();
 	
 	//extend default options
-	_.extend(options, _options);
-	
+    _.extend(settings, _settings);
+    
 	//configure express app
 	app.configure(function(){
 		app.use(express.bodyParser());
 	});
 		
 	//set up routing loop
-	for (var i in options.routing) {
-		options.routing[i].method === 'get' ? new getRoute(options.routing[i]) : new postRoute(options.routing[i]);
+	for (var i in settings.routing) {
+		settings.routing[i].method === 'get' ? new getRoute(settings.routing[i]) : new postRoute(settings.routing[i]);
 	}
 	
 	//get app to listen to requests
-	app.listen(process.env.PORT || parseInt(options['port'], 10));
+	app.listen(parseInt(settings.options['port'], 10));
 
 	//confirm app is running
-	console.log("Web server started at " + options['port']);
+	console.log("Web server started at " + settings.options['port']);
 
 };
