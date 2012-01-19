@@ -1,0 +1,30 @@
+include doctype
+include header_config
+
+body.config
+    #header
+        h1 Javascript MVC Lesson 1: Backbone
+    #page
+        h2 Server config
+        table
+            thead
+                td Key
+                td Value
+            - for (var key in settings.options)
+                tr
+                    td.key
+                        em= key
+                    td.value= settings.options[key]
+        h2 Routing config
+        - for (var key in settings.routing)
+            h3= settings.routing[key].regex
+            table
+                thead
+                    td.key Key
+                    td.value Value
+                - for (var attr in settings.routing[key])
+                    - if (attr != 'regex')
+                        tr
+                            td.key
+                                em= attr + ': '
+                            td.value= settings.routing[key][attr]

@@ -1,0 +1,19 @@
+include doctype
+include header
+
+body
+    #header
+        h1 Javascript MVC Lesson 1: Backbone
+    #page
+        form#multiply(method="post",action="/")
+            label(for="operand1") First operand
+            input(name="operand1", id="operand1", type="text", value=attributes.operand1, placeholder="Enter an integer value", class=(errors.operand1 ? "error" : ""))
+            label(for="operand2") Second operand
+            input(name="operand2", id="operand2", type="text", value=attributes.operand2, placeholder="Enter an integer value", class=(errors.operand2 ? "error" : ""))
+            input(type="submit", value="Multiply!")
+        #result
+            - if (errors.length === 0 && typeof(attributes.result) != 'undefined')
+                #{attributes.operand1} * #{attributes.operand2} = #{attributes.result}
+            - else
+                - for (var error in errors)
+                    span= error.name + ': ' + errors[error].error

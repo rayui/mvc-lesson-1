@@ -1,14 +1,10 @@
-!!! 5
-html
-	head
-		script(src='/js/lib/jquery-1.7.1.min.js')
-		script(src='/js/lib/underscore-min.js')
-		script(src='/js/lib/backbone-min.js')
-		script(src='/js/shared/utilities.js')
-		script(src='/js/common.js')
-		link(rel="stylesheet", type="text/css", href="/css/style.css")	
-	body
-		#header
-			h1 OH NO 404!
-		#page
-			p We couldn't find that page. Sorry!
+include doctype
+include header
+
+body
+    #header
+        h1 OH NO 404!
+        h2 We couldn't find that page. Sorry!
+    #page
+        p 
+            a(href="/") Return to the index

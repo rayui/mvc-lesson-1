@@ -1,0 +1,20 @@
+thead {
+  display:none;
+}
+
+table {
+  width:100%;
+}
+
+td {
+  vertical-align:top;
+  padding:3px;
+}
+
+td.key {
+  width:200px;
+}
+
+tr:nth-child(odd) {
+  background-color:#e0e0e0;
+}
