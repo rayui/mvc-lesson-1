@@ -12,7 +12,7 @@
 	RegExp.escape = function(text) {
 	    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 	};
-	
+		
 	/* A utility function for callback() */
 	function toArray(arrayLike){
 	    var arr = [];
@@ -21,31 +21,6 @@
 	    }
 	    return arr;
 	}
-		
-	exports.validate = function(attrs) {
-		//- errors array to return
-		var errors = {};
-	
-		//- check if input is an integer and push to error array if not
-		var checkInteger = function(id, value) {
-			if(!((parseFloat(value) === parseInt(value, 10)) && !isNaN(value))){
-				errors[id] = 'must be an integer';
-			}
-		};
-		
-		//- check all field types
-		for (id in attrs) {
-			checkInteger(id, attrs[id]);
-		}
-		
-		//- if elements with errors, return them
-		if (Object.size(errors)) {
-			return errors;
-		}
-		
-		//- otherwise return null
-		return null;
-	};
 	
 	/**
 	 * @param {Function} func the callback function

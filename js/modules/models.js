@@ -1,5 +1,6 @@
 var _ = require('underscore')._,
-	utilities = require('./shared/utilities');
+	utilities = require('./shared/utilities'),
+	validate = require('./shared/validate');
 
 //create default data object
 exports.defaultData = function(_data) {
@@ -18,10 +19,10 @@ exports.defaultData = function(_data) {
 exports.multiplyData = function(data) {
 	
 	data = exports.defaultData(data);
-	data.errors = utilities.validate(data.attributes);
+	data.errors = validate.canMultiply(data.attributes);
 	
 	if (data.errors) {
-		data.result = undefined;
+		data.attributes.result = undefined;
 	} else {
 		data.errors = [];
 		data.attributes.result = data.attributes.operand1 * data.attributes.operand2;

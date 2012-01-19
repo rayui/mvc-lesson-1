@@ -15,7 +15,8 @@ exports.webServer = function(_options){
 	};
 	
 	//server error pages
-	function serveError(number, template, callback) {
+	function serveError(number, callback) {
+		var template = options['template_dir'] + '/' + number + '.jade';
 		jade.renderFile(template, number, function(err,html){
 			if (err) {
 				if (number !== 500) {
@@ -69,23 +70,23 @@ exports.webServer = function(_options){
 		var router = function(req, res, next, route) {
 			switch (route.type) {
 				case '302':
-					var template = options['template_dir'] + '/' + '302.jade';
-					serveError(302, template, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
+					var headers = route.headers(req.headers, req.params);
+					res.redirect(headers['Location']);
 					break;
 				case '404':
-					var template = options['template_dir'] + '/' + '404.jade';
-					serveError(404, template, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
+					var template = options['template_dir'] + '/404.jade';
+					serveError(404, utilities.callback(sendResponse, {args:[{'Content-Type':'text/html'},res]}));
 					break;
 				case 'static':
 					var headers = route.headers(req.headers, req.params);
 					var path = __dirname + route.path(req.params);
 					serveStatic(path, utilities.callback(sendResponse, {args:[headers,res]}));
 					break;
-				case 'html':
+				case 'dynamic':
 				default:
 					var headers = route.headers(req.headers, req.params);
 					var data = utilities.callFunctionByName(route.model, models, req.params);
-					var template = options['template_dir'] + '/index.jade';
+					var template = options['template_dir'] + '/' + route['template'] + '.jade';
 					serveHTML(data, template, utilities.callback(sendResponse, {args:[headers,res]}));
 			}	
 		};
@@ -135,4 +136,5 @@ exports.webServer = function(_options){
 
 	//confirm app is running
 	console.log("Web server started at " + options['port']);
+
 };

@@ -5,6 +5,7 @@ html
 		script(src='/js/lib/underscore-min.js')
 		script(src='/js/lib/backbone-min.js')
 		script(src='/js/shared/utilities.js')
+		script(src='/js/shared/validate.js')
 		script(src='/js/common.js')
 		link(rel="stylesheet", type="text/css", href="/css/style.css")	
 	body
@@ -22,4 +23,4 @@ html
 					#{attributes.operand1} * #{attributes.operand2} = #{attributes.result}
 				- else
 					- for (var error in errors)
-						span= error + ': ' + errors[error]
+						span= error.name + ': ' + errors[error].error

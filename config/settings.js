@@ -53,19 +53,24 @@ var dev = {
 					}
 				},
 				path: function(params) {
-					return '/../../public/docs/' + params[0]
+					var path = '/../../public/docs/';
+					if (!params[0]) {
+						return path += 'index.html';
+					}
+					return '/../../public/docs/' + params[0];
 				}
 			},
 			{
-				regex:'\\/',
-				type:'html',
+				regex:'^\\/$',
+				type:'dynamic',
 				method:'get',
 				headers: function(headers, params) {
 					return {
 						'Content-Type':'text/html'
 					}	
 				},
-				model: 'defaultData'
+				model: 'defaultData',
+				template: 'index'
 			},
 			{
 				regex:'^(\\/[\\w\\-\\.]+)$',
@@ -77,17 +82,15 @@ var dev = {
 					}
 				}
 				
-			},			
+			},	
 			{
 				regex:'^.*?',
 				method:'get',
 				type:'404',
 				headers:function(headers, params) {
-					return {
-						'Location':'/404'
-					}
+					return {}
 				}
-			},
+			},		
 			{
 				regex:'\\/',
 				method:'post',
@@ -96,7 +99,8 @@ var dev = {
 						'Content-Type':String(headers['content-type']).indexOf('json') >= 0 ? 'application/json' : 'text/html'
 					}
 				},
-				model: 'multiplyData'
+				model: 'multiplyData',
+				template: 'index'
 			}
 		]
 	}

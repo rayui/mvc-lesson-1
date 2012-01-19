@@ -3,7 +3,7 @@ $(function($){
 	//simplest possible model
 	var Model = Backbone.Model.extend({
 		url:'/',
-		validate:utilities.validate
+		validate:validate.canMultiply
 	});
 
 	//basic view for multiplier calculator
@@ -17,6 +17,18 @@ $(function($){
 			'submit #multiply':		'submit'
 		},
 		
+		//- renders and error notification
+		renderError: function(name, error) {
+			$('input[name="' + name + '"]').addClass('error');
+			$('div#result').append('<span>' + name + ': ' + error + '</span>');
+		},
+		
+		//- clears existing error notifications
+		clearErrors: function() {
+			$('input').removeClass('error');
+			$('div#result').empty();
+		},
+		
 		//- when inputs change, save the model to the server
 		//- if it fails validation, the error function will kick in
 		//- when a success response is received, this will trigger the model's change event and causing it to render
@@ -25,30 +37,18 @@ $(function($){
 			var clearErrors = this.clearErrors;
 
 			this.model.save({
-				'operand1': parseInt($('input#operand1').val(), 10),
-				'operand2': parseInt($('input#operand2').val(), 10)
+				'operand1': $('input[name="operand1"]').val(),
+				'operand2': $('input[name="operand2"]').val()
 			},{
 				error: function(model, errors) {
 					clearErrors();
-					for (attr in errors) {
-						renderError(attr, errors[attr]);
+					for (error in errors) {
+						renderError(errors[error].name, errors[error].error);
 					}
 				}
 			});
 			
 			return false;
-		},
-		
-		//- renders and error notification
-		renderError: function(id, error) {
-			$('input#' + id).addClass('error');
-			$('div#result').append('<span>' + id + ': ' + error + '</span>');
-		},
-		
-		//- clears existing error notifications
-		clearErrors: function() {
-			$('input').removeClass('error');
-			$('div#result').empty();
 		},
 		
 		//- render result on server response
