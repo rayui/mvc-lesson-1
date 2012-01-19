@@ -20,7 +20,7 @@ exports.webServer = function(_options){
 		jade.renderFile(template, number, function(err,html){
 			if (err) {
 				if (number !== 500) {
-					serveError(500, '', function(html, http_code) {
+					serveError(500, function(html, http_code) {
 						callback.apply(this, [html, http_code]);
 					});
 				} else {
