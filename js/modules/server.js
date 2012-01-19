@@ -11,7 +11,7 @@ exports.webServer = function(_settings){
 	//default settings
 	var settings = {
         options:{
-            port:process.env.PORT || 8000,
+            port:8000,
             template_dir:'/../../templates'
         }
 	};
@@ -138,7 +138,7 @@ exports.webServer = function(_settings){
 	}
 	
 	//get app to listen to requests
-	app.listen(parseInt(settings.options['port'], 10));
+	app.listen(process.env.PORT || parseInt(settings.options['port'], 10));
 
 	//confirm app is running
 	console.log("Web server started at " + settings.options['port']);
