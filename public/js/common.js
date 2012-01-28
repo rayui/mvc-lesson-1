@@ -54,9 +54,9 @@ $(function($){
 				
 		//- render result on server response
 		render: function() {
+			this.clearErrors();
 			//-- only update view if we have a different result from previous valid model
 			if (this.model.hasChanged('result')) {
-				this.clearErrors();
 				$('div#result').text(
 					this.model.get('operand1') +
 					' * ' +
