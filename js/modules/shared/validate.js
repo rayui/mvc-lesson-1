@@ -18,7 +18,7 @@
 
 	//- check if input is an integer and push to error array if not
 	function isEmptyString(value) {
-		if(value.toString() === ''){
+		if(!value){
 			return('is mandatory');
 		}
 		return false;

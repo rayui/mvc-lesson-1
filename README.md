@@ -10,6 +10,10 @@
 * npm install optimist
 * npm install docco
 
+Docco requires Pygments. On Debian based systems you can install this with the following command:
+
+sudo aptitude install python-pygments
+
 ## To generate the documentation do this:
 
 * chmod u+x doc-generator.sh
